@@ -1,24 +1,31 @@
-import logo from './logo.svg';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
+import Home from './pages/Home';
+// import QuienesSomos from './pages/QuienesSomos';
+// import VidaUniversitaria from './pages/VidaUniversitaria';
+// import BienestarEstudiantil from './pages/BienestarEstudiantil';
+// import SaludMental from './pages/SaludMental';
+// import Programas from './pages/Programas';
+// import Noticias from './pages/Noticias';
+// import Contactanos from './pages/Contactanos';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          {/* <Route path="/quienes-somos" element={<QuienesSomos />} />
+          <Route path="/vida-universitaria" element={<VidaUniversitaria />} />
+          <Route path="/bienestar-estudiantil" element={<BienestarEstudiantil />} />
+          <Route path="/salud-mental" element={<SaludMental />} />
+          <Route path="/programas" element={<Programas />} />
+          <Route path="/noticias" element={<Noticias />} />
+          <Route path="/contactanos" element={<Contactanos />} /> */}
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
