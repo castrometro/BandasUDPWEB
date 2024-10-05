@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
 import Home from './pages/Home';
+import BandasUDP from './pages/BandasUDP';
 // import QuienesSomos from './pages/QuienesSomos';
 // import VidaUniversitaria from './pages/VidaUniversitaria';
 // import BienestarEstudiantil from './pages/BienestarEstudiantil';
@@ -16,6 +17,7 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/bandas-udp" element={<BandasUDP/>} />
           {/* <Route path="/quienes-somos" element={<QuienesSomos />} />
           <Route path="/vida-universitaria" element={<VidaUniversitaria />} />
           <Route path="/bienestar-estudiantil" element={<BienestarEstudiantil />} />
