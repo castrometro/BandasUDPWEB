@@ -10,7 +10,7 @@ import musicEventsImage from '../images/music-events.jpg'
 export default function Home() {
   const headerNavItems = [
     { title: "Login", url: "/iniciar-sesion" },
-    { title: "Salas de ensayo", url: "/salas-de-ensayo" },
+    { title: "Salas de ensayo", url: "/sala-de-ensayo" },
     { title: "Bandas UDP", url: "/bandas-udp" },
     { title: "Verificador Integrante", url: "/verificador-integrante" },
     { title: "Calendario salas", url: "/calendario-salas" }
@@ -22,7 +22,7 @@ export default function Home() {
       description: "Espacios equipados para que tu banda suene como nunca antes. Reserva ahora y lleva tu música al siguiente nivel.",
       backgroundImage: salasEnsayoImage,
       buttonText: "Reservar Sala",
-      buttonLink: "/salas-de-ensayo"
+      buttonLink: "/sala-de-ensayo"
     },
     {
       title: "Bandas UDP",
