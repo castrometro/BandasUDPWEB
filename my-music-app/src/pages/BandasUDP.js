@@ -56,13 +56,6 @@ export default function BandasUDP() {
     <div className="min-h-screen flex flex-col">
       <Header navItems={headerNavItems} logo={logoImage} />
       <main className="flex-grow">
-        <Section
-          title="Bandas UDP"
-          description="Descubre el talento musical de nuestra universidad. Conoce las bandas, sus géneros y próximas presentaciones."
-          backgroundImage={musicBackgroundImage}
-          buttonText="Ver todas las bandas"
-          buttonLink="#bands-list"
-        />
         <div id="bands-list" className="container mx-auto px-4 py-12">
           <h2 className="text-3xl font-bold mb-8 text-center">Nuestras Bandas</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

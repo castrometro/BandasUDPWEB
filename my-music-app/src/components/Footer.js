@@ -1,11 +1,12 @@
 import React from 'react'
+import LogoUDP from '../images/Logo_UDP.png'
 
 const Footer = () => (
   <footer className="bg-black text-white py-12">
     <div className="container mx-auto px-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
-          <img src="/path-to-udp-logo.png" alt="UDP Logo" className="mb-4" />
+          <img src={LogoUDP} alt="UDP Logo" className="h-8 mb-4" /> {/* Adjusted height */}
         </div>
         <div>
           <img src="/path-to-acreditacion-logo.png" alt="Acreditación Logo" className="mb-4" />
