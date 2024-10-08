@@ -43,5 +43,7 @@ Puntos importantes a tener en cuenta:
 - Si has realizado alguna configuración específica (como variables de entorno), asegúrate de compartir esa información con tu equipo.
 - Es una buena práctica tener un archivo README.md en tu repositorio con instrucciones detalladas sobre cómo configurar y ejecutar el proyecto.
 
-
-¿Hay algo más que te gustaría saber sobre cómo compartir tu proyecto o trabajar en equipo con Git y GitHub?
+DEPENDENCIAS ADICIONALES:
+npm install react-qr-code html5-qrcode
+npm install qrcode.react  
+npm install date-fns

@@ -6,6 +6,7 @@ import IniciarSesion from './pages/IniciarSesion';
 import BandasUDP from './pages/BandasUDP';
 import SalaDeEnsayo from './pages/SalaDeEnsayo';
 import Calendario from './pages/Calendario';
+import Verificador from './pages/Verificador';
 // import QuienesSomos from './pages/QuienesSomos';
 // import VidaUniversitaria from './pages/VidaUniversitaria';
 // import BienestarEstudiantil from './pages/BienestarEstudiantil';
@@ -24,7 +25,7 @@ function App() {
           <Route path="/iniciar-sesion" element={<IniciarSesion />} />
           <Route path="/sala-de-ensayo" element={<SalaDeEnsayo />} />
           <Route path="/calendario-salas" element={<Calendario/>} />
-
+          <Route path="/verificador-integrante" element={<Verificador/>} />
           {/* <Route path="/quienes-somos" element={<QuienesSomos />} />
           <Route path="/vida-universitaria" element={<VidaUniversitaria />} />
           <Route path="/bienestar-estudiantil" element={<BienestarEstudiantil />} />
