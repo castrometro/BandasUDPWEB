@@ -42,7 +42,7 @@ const Verificador = () => {
   };
 
   const headerNavItems = [
-    { title: "Inicio", url: "/" },
+    { title: "Login", url: "/iniciar-sesion" },
     { title: "Salas de ensayo", url: "/salas-de-ensayo" },
     { title: "Bandas UDP", url: "/bandas-udp" },
     { title: "Verificador Integrante", url: "/verificador-integrante" },
