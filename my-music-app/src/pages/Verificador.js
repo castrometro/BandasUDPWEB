@@ -43,7 +43,7 @@ const Verificador = () => {
 
   const headerNavItems = [
     { title: "Login", url: "/iniciar-sesion" },
-    { title: "Salas de ensayo", url: "/salas-de-ensayo" },
+    { title: "Salas de ensayo", url: "/sala-de-ensayo" },
     { title: "Bandas UDP", url: "/bandas-udp" },
     { title: "Verificador Integrante", url: "/verificador-integrante" },
     { title: "Calendario salas", url: "/calendario-salas" }

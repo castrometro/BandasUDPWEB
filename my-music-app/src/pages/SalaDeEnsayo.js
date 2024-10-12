@@ -6,7 +6,7 @@ import logo from '../images/logo.png'
 import imagen_sala from '../images/sala-ensayo-real.jpeg'
 const SalaDeEnsayo = () => {
   const headerNavItems = [
-    { title: "Inicio", url: "/" },
+    { title: "Login", url: "/iniciar-sesion" },
     { title: "Salas de ensayo", url: "/sala-de-ensayo" },
     { title: "Bandas UDP", url: "/bandas-udp" },
     { title: "Verificador Integrante", url: "/verificador-integrante" },

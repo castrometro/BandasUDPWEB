@@ -1,126 +1,185 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import logoUDP from '../images/logo.png'
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function LoginComponent() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
+const LoginComponent = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    rut: '',
+    nombre: '',
+    apellido: '',
+    esAlumnoUDP: false,
+    carrera: '',
+    tipoUsuario: 'Externo'
+  });
+  const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setErrorMessage('')
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: type === 'checkbox' ? checked : value,
+      tipoUsuario: name === 'esAlumnoUDP' ? (checked ? 'Alumno UDP' : 'Externo') : prevState.tipoUsuario
+    }));
+  };
 
-    try {
-      // Here you would call your authentication API
-      const response = await fakeAuthCall(username, password)
-      
-      if (response.success) {
-        navigate('/dashboard')
-      } else {
-        setErrorMessage('Credenciales inválidas. Por favor, intente de nuevo.')
-      }
-    } catch (error) {
-      setErrorMessage('Hubo un problema al iniciar sesión. Por favor, intente de nuevo más tarde.')
-    } finally {
-      setIsLoading(false)
+  const validateForm = () => {
+    let errors = {};
+    if (!formData.email.trim()) errors.email = "El email es requerido";
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = "Email inválido";
+    if (!formData.password) errors.password = "La contraseña es requerida";
+    if (!isLogin) {
+      if (!formData.rut.trim()) errors.rut = "El RUT es requerido";
+      if (!formData.nombre.trim()) errors.nombre = "El nombre es requerido";
+      if (!formData.apellido.trim()) errors.apellido = "El apellido es requerido";
+      if (formData.esAlumnoUDP && !formData.carrera.trim()) errors.carrera = "La carrera es requerida para alumnos UDP";
     }
-  }
+    return errors;
+  };
 
-  // This is a simulated authentication function
-  const fakeAuthCall = (username, password) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ success: username === 'Admin' && password === 'Admin' })
-      }, 1000)
-    })
-  }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length === 0) {
+      // Aquí iría la lógica para enviar los datos al servidor
+      console.log('Formulario enviado:', formData);
+      // Redirigir al usuario al dashboard o a la página principal
+      navigate('/dashboard');
+    } else {
+      setErrors(validationErrors);
+    }
+  };
 
   return (
-    <div className="w-full max-w-md space-y-8">
-      <div>
-        <img className="mx-auto h-12 w-auto" src={logoUDP} alt="Logo UDP" />
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Iniciar sesión
-        </h2>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="px-8 py-6 mt-4 text-left bg-white shadow-lg rounded-lg">
+        <h3 className="text-2xl font-bold text-center">{isLogin ? 'Iniciar Sesión' : 'Registrarse'}</h3>
+        <form onSubmit={handleSubmit} className="mt-4">
+          <div className="mt-4">
+            <label className="block" htmlFor="email">Email</label>
+            <input
+              type="email"
+              placeholder="tu@email.com"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+            />
+            {errors.email && <span className="text-xs text-red-400">{errors.email}</span>}
+          </div>
+          <div className="mt-4">
+            <label className="block" htmlFor="password">Contraseña</label>
+            <input
+              type="password"
+              placeholder="********"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+            />
+            {errors.password && <span className="text-xs text-red-400">{errors.password}</span>}
+          </div>
+          {!isLogin && (
+            <>
+              <div className="mt-4">
+                <label className="block" htmlFor="rut">RUT</label>
+                <input
+                  type="text"
+                  placeholder="12345678-9"
+                  id="rut"
+                  name="rut"
+                  value={formData.rut}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                />
+                {errors.rut && <span className="text-xs text-red-400">{errors.rut}</span>}
+              </div>
+              <div className="mt-4">
+                <label className="block" htmlFor="nombre">Nombre</label>
+                <input
+                  type="text"
+                  placeholder="Tu nombre"
+                  id="nombre"
+                  name="nombre"
+                  value={formData.nombre}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                />
+                {errors.nombre && <span className="text-xs text-red-400">{errors.nombre}</span>}
+              </div>
+              <div className="mt-4">
+                <label className="block" htmlFor="apellido">Apellido</label>
+                <input
+                  type="text"
+                  placeholder="Tu apellido"
+                  id="apellido"
+                  name="apellido"
+                  value={formData.apellido}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                />
+                {errors.apellido && <span className="text-xs text-red-400">{errors.apellido}</span>}
+              </div>
+              <div className="mt-4">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="esAlumnoUDP"
+                    checked={formData.esAlumnoUDP}
+                    onChange={handleChange}
+                    className="mr-2"
+                  />
+                  <span>Alumno UDP</span>
+                </label>
+              </div>
+              {formData.esAlumnoUDP && (
+                <div className="mt-4">
+                  <label className="block" htmlFor="carrera">Carrera</label>
+                  <input
+                    type="text"
+                    placeholder="Tu carrera"
+                    id="carrera"
+                    name="carrera"
+                    value={formData.carrera}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                  />
+                  {errors.carrera && <span className="text-xs text-red-400">{errors.carrera}</span>}
+                </div>
+              )}
+              <div className="mt-4">
+                <label className="block" htmlFor="tipoUsuario">Tipo de Usuario</label>
+                <input
+                  type="text"
+                  id="tipoUsuario"
+                  name="tipoUsuario"
+                  value={formData.tipoUsuario}
+                  readOnly
+                  className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100"
+                />
+              </div>
+            </>
+          )}
+          <div className="flex items-baseline justify-between mt-4">
+            <button className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900">
+              {isLogin ? 'Iniciar Sesión' : 'Registrarse'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-sm text-blue-600 hover:underline"
+            >
+              {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
+            </button>
+          </div>
+        </form>
       </div>
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        <div className="flex flex-col items-center">
-          <div className="w-3/4 space-y-4">
-            <div>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                autoComplete="username"
-                required
-                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
-                placeholder="Nombre de usuario"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                required
-                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
-                placeholder="Contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-600"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? 'Ocultar' : 'Mostrar'}
-              </button>
-            </div>
-          </div>
-
-          <div className="w-3/4 flex items-center justify-between mt-4">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Recordarme
-              </label>
-            </div>
-
-            <div className="text-sm">
-              <a href="#" className="font-medium text-red-600 hover:text-red-500">
-                ¿Olvidó su contraseña?
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {errorMessage && (
-          <p className="text-red-500 text-sm mt-2 text-center">{errorMessage}</p>
-        )}
-
-        <div className="flex justify-center">
-          <button
-            type="submit"
-            className="w-3/4 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
-          </button>
-        </div>
-      </form>
     </div>
-  )
-}
+  );
+};
+
+export default LoginComponent;
