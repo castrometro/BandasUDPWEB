@@ -9,6 +9,7 @@ import Calendario from './pages/Calendario';
 import Verificador from './pages/Verificador';
 import RegistroUsuario from './components/RegistroUsuario';
 import PerfilUsuario from './pages/PerfilUsuario';
+import BandPage from './pages/BandPage';
 import GestionBandas from './pages/GestionBandas';
 
 // import QuienesSomos from './pages/QuienesSomos';
@@ -33,6 +34,7 @@ function App() {
           <Route path="/registro-usuario" element={<RegistroUsuario/>} />
           <Route path="/perfil-usuario" element={<PerfilUsuario/>} />
           <Route path="/gestion-bandas" element={<GestionBandas/>} />
+          <Route path="/band-page" element={<BandPage/>} />
           {/* <Route path="/quienes-somos" element={<QuienesSomos />} />
           <Route path="/vida-universitaria" element={<VidaUniversitaria />} />
           <Route path="/bienestar-estudiantil" element={<BienestarEstudiantil />} />
