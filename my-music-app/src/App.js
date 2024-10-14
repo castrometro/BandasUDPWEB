@@ -31,9 +31,7 @@ function App() {
           <Route path="/sala-de-ensayo" element={<SalaDeEnsayo />} />
           <Route path="/calendario-salas" element={<Calendario/>} />
           <Route path="/verificador-integrante" element={<Verificador/>} />
-          <Route path="/registro-usuario" element={<RegistroUsuario/>} />
           <Route path="/perfil-usuario" element={<PerfilUsuario/>} />
-          <Route path="/gestion-bandas" element={<GestionBandas/>} />
           <Route path="/band-page" element={<BandPage/>} />
           {/* <Route path="/quienes-somos" element={<QuienesSomos />} />
           <Route path="/vida-universitaria" element={<VidaUniversitaria />} />
