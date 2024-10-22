@@ -1,52 +1,101 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
-const LoginComponent = () => {
+export default function LoginComponent() {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rut: '',
     nombre: '',
     apellido: '',
-    esAlumnoUDP: false,
+    rut: '',
+    correo: '',
+    password: '',
+    es_udp: false,
     carrera: '',
-    tipoUsuario: 'Externo'
   });
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === '/iniciar-sesion') {
+      setIsLogin(true); // Restablecer al estado de inicio de sesión cuando esté en /iniciar-sesion
+    }
+  }, [location.pathname]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prevState => ({
       ...prevState,
       [name]: type === 'checkbox' ? checked : value,
-      tipoUsuario: name === 'esAlumnoUDP' ? (checked ? 'Alumno UDP' : 'Externo') : prevState.tipoUsuario
     }));
   };
 
   const validateForm = () => {
     let errors = {};
-    if (!formData.email.trim()) errors.email = "El email es requerido";
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = "Email inválido";
+    if (!formData.correo.trim()) errors.correo = "El email es requerido";
+    else if (!/\S+@\S+\.\S+/.test(formData.correo)) errors.correo = "Email inválido";
     if (!formData.password) errors.password = "La contraseña es requerida";
     if (!isLogin) {
       if (!formData.rut.trim()) errors.rut = "El RUT es requerido";
       if (!formData.nombre.trim()) errors.nombre = "El nombre es requerido";
       if (!formData.apellido.trim()) errors.apellido = "El apellido es requerido";
-      if (formData.esAlumnoUDP && !formData.carrera.trim()) errors.carrera = "La carrera es requerida para alumnos UDP";
+      if (formData.es_udp && !formData.carrera.trim()) errors.carrera = "La carrera es requerida para alumnos UDP";
     }
     return errors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length === 0) {
-      // Aquí iría la lógica para enviar los datos al servidor
-      console.log('Formulario enviado:', formData);
-      // Redirigir al usuario al dashboard o a la página principal
-      navigate('/dashboard');
+      try {
+        let response;
+        if (isLogin) {
+          response = await axios.post('http://localhost:5000/api/users/login', {
+            correo: formData.correo,
+            password: formData.password
+          });
+
+          if (response.data.token) {
+            localStorage.setItem('token', response.data.token);
+            navigate('/');
+          } else {
+            setApiError('Error en la respuesta del servidor');
+          }
+        } else {
+          const registerData = {
+            nombre: formData.nombre,
+            apellido: formData.apellido,
+            rut: formData.rut,
+            correo: formData.correo,
+            password: formData.password,
+            es_udp: formData.es_udp ? 'si' : 'no',
+            carrera: formData.carrera
+          };
+          console.log('Datos a enviar:', registerData);
+          response = await axios.post('http://localhost:5000/api/users/register', registerData);
+
+          // Verifica que el registro fue exitoso usando el código de estado de la respuesta
+          if (response.status === 201) {
+            // Redirigir al inicio de sesión después del registro exitoso
+            navigate('/iniciar-sesion');
+            window.location.reload(); // Recargar la página para mostrar el formulario de inicio de sesión
+          } else {
+            setApiError('Error en la respuesta del servidor');
+          }
+        }
+      } catch (error) {
+        console.error('Error details:', error);
+        if (error.response) {
+          setApiError(error.response.data.message || 'Error en el servidor');
+        } else if (error.request) {
+          setApiError('No se pudo conectar con el servidor');
+        } else {
+          setApiError('Error al procesar la solicitud');
+        }
+      }
     } else {
       setErrors(validationErrors);
     }
@@ -56,19 +105,20 @@ const LoginComponent = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="px-8 py-6 mt-4 text-left bg-white shadow-lg rounded-lg">
         <h3 className="text-2xl font-bold text-center">{isLogin ? 'Iniciar Sesión' : 'Registrarse'}</h3>
+        {apiError && <div className="mt-4 text-red-500 text-center">{apiError}</div>}
         <form onSubmit={handleSubmit} className="mt-4">
           <div className="mt-4">
-            <label className="block" htmlFor="email">Email</label>
+            <label className="block" htmlFor="correo">Email</label>
             <input
               type="email"
               placeholder="tu@email.com"
-              id="email"
-              name="email"
-              value={formData.email}
+              id="correo"
+              name="correo"
+              value={formData.correo}
               onChange={handleChange}
               className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
             />
-            {errors.email && <span className="text-xs text-red-400">{errors.email}</span>}
+            {errors.correo && <span className="text-xs text-red-400">{errors.correo}</span>}
           </div>
           <div className="mt-4">
             <label className="block" htmlFor="password">Contraseña</label>
@@ -128,15 +178,15 @@ const LoginComponent = () => {
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    name="esAlumnoUDP"
-                    checked={formData.esAlumnoUDP}
+                    name="es_udp"
+                    checked={formData.es_udp}
                     onChange={handleChange}
                     className="mr-2"
                   />
                   <span>Alumno UDP</span>
                 </label>
               </div>
-              {formData.esAlumnoUDP && (
+              {formData.es_udp && (
                 <div className="mt-4">
                   <label className="block" htmlFor="carrera">Carrera</label>
                   <input
@@ -151,17 +201,6 @@ const LoginComponent = () => {
                   {errors.carrera && <span className="text-xs text-red-400">{errors.carrera}</span>}
                 </div>
               )}
-              <div className="mt-4">
-                <label className="block" htmlFor="tipoUsuario">Tipo de Usuario</label>
-                <input
-                  type="text"
-                  id="tipoUsuario"
-                  name="tipoUsuario"
-                  value={formData.tipoUsuario}
-                  readOnly
-                  className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100"
-                />
-              </div>
             </>
           )}
           <div className="flex items-baseline justify-between mt-4">
@@ -170,7 +209,11 @@ const LoginComponent = () => {
             </button>
             <button
               type="button"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setErrors({});
+                setApiError('');
+              }}
               className="text-sm text-blue-600 hover:underline"
             >
               {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
@@ -180,6 +223,4 @@ const LoginComponent = () => {
       </div>
     </div>
   );
-};
-
-export default LoginComponent;
+}
