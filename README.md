@@ -33,6 +33,21 @@ Una vez que todas las dependencias estén instaladas, pueden iniciar el proyecto
 npm start
 ```
 
+5. Navegar al directorio del servidor:
+```plaintext
+cd my-music-app/servidor
+```
+6. Instalar dependencias:
+
+```plaintext
+npm install
+```
+7. Iniciar servidor
+
+```plaintext
+node server.js
+```
+   
 
 
 
