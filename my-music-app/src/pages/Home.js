@@ -2,6 +2,7 @@ import React from 'react'
 import Header from '../components/Header'
 import Section from '../components/Section'
 import Footer from '../components/Footer'
+import { AuthProvider } from '../components/AuthContext'
 import logo from '../images/logo.png'
 import salasEnsayoImage from '../images/SalasEnsayo-general.jpg'
 import bandasGeneralImage from '../images/bandas-general.jpg'
@@ -41,21 +42,23 @@ export default function Home() {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header navItems={headerNavItems} logo={logo} />
-      <main className="flex-grow">
-        {sections.map((section, index) => (
-          <Section 
-            key={index}
-            title={section.title}
-            description={section.description}
-            backgroundImage={section.backgroundImage}
-            buttonText={section.buttonText}
-            buttonLink={section.buttonLink}
-          />
-        ))}
-      </main>
-      <Footer />
-    </div>
+    <AuthProvider>
+      <div className="min-h-screen flex flex-col">
+        <Header navItems={headerNavItems} logo={logo} />
+        <main className="flex-grow">
+          {sections.map((section, index) => (
+            <Section 
+              key={index}
+              title={section.title}
+              description={section.description}
+              backgroundImage={section.backgroundImage}
+              buttonText={section.buttonText}
+              buttonLink={section.buttonLink}
+            />
+          ))}
+        </main>
+        <Footer />
+      </div>
+    </AuthProvider>
   )
 }

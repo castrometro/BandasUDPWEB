@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../components/AuthContext';
 
 export default function LoginComponent() {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,10 +18,11 @@ export default function LoginComponent() {
   const [apiError, setApiError] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
 
   useEffect(() => {
     if (location.pathname === '/iniciar-sesion') {
-      setIsLogin(true); // Restablecer al estado de inicio de sesión cuando esté en /iniciar-sesion
+      setIsLogin(true);
     }
   }, [location.pathname]);
 
@@ -59,7 +61,7 @@ export default function LoginComponent() {
           });
 
           if (response.data.token) {
-            localStorage.setItem('token', response.data.token);
+            login(response.data.token, response.data.user);
             navigate('/');
           } else {
             setApiError('Error en la respuesta del servidor');
@@ -77,11 +79,9 @@ export default function LoginComponent() {
           console.log('Datos a enviar:', registerData);
           response = await axios.post('http://localhost:5000/api/users/register', registerData);
 
-          // Verifica que el registro fue exitoso usando el código de estado de la respuesta
           if (response.status === 201) {
-            // Redirigir al inicio de sesión después del registro exitoso
             navigate('/iniciar-sesion');
-            window.location.reload(); // Recargar la página para mostrar el formulario de inicio de sesión
+            window.location.reload();
           } else {
             setApiError('Error en la respuesta del servidor');
           }

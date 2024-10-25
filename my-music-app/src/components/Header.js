@@ -1,8 +1,23 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from './AuthContext'
 
 const Header = ({ navItems, logo }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { user, logout } = useAuth()
+
+  const handleLogout = () => {
+    logout()
+    setIsMenuOpen(false)
+  }
+
+  const authNavItems = user
+    ? [
+        ...navItems.filter(item => item.title !== "Login"),
+        { title: "Mi Perfil", url: "/perfil-usuario" },
+        { title: "Cerrar sesión", url: "#", onClick: handleLogout }
+      ]
+    : navItems
 
   return (
     <header className="bg-white shadow-md">
@@ -25,11 +40,17 @@ const Header = ({ navItems, logo }) => {
           {/* Navigation for larger screens */}
           <nav className="hidden md:block">
             <ul className="flex space-x-4">
-              {navItems.map((item, index) => (
+              {authNavItems.map((item, index) => (
                 <li key={index}>
-                  <Link to={item.url} className="text-gray-700 hover:text-red-600">
-                    {item.title}
-                  </Link>
+                  {item.onClick ? (
+                    <button onClick={item.onClick} className="text-gray-700 hover:text-red-600">
+                      {item.title}
+                    </button>
+                  ) : (
+                    <Link to={item.url} className="text-gray-700 hover:text-red-600">
+                      {item.title}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -40,15 +61,27 @@ const Header = ({ navItems, logo }) => {
         {isMenuOpen && (
           <nav className="mt-4 md:hidden">
             <ul className="flex flex-col space-y-2">
-              {navItems.map((item, index) => (
+              {authNavItems.map((item, index) => (
                 <li key={index}>
-                  <Link 
-                    to={item.url} 
-                    className="block text-gray-700 hover:text-red-600 py-2"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.title}
-                  </Link>
+                  {item.onClick ? (
+                    <button 
+                      onClick={() => {
+                        item.onClick()
+                        setIsMenuOpen(false)
+                      }}
+                      className="block text-gray-700 hover:text-red-600 py-2 w-full text-left"
+                    >
+                      {item.title}
+                    </button>
+                  ) : (
+                    <Link 
+                      to={item.url} 
+                      className="block text-gray-700 hover:text-red-600 py-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.title}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
