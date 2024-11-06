@@ -1,30 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../components/AuthContext';
 
-export default function LoginComponent() {
+const LoginComponent = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    rut: '',
     correo: '',
     password: '',
+    rut: '',
+    nombre: '',
+    apellido: '',
     es_udp: false,
     carrera: '',
   });
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Added loading state
   const navigate = useNavigate();
-  const location = useLocation();
-  const { login } = useAuth();
-
-  useEffect(() => {
-    if (location.pathname === '/iniciar-sesion') {
-      setIsLogin(true);
-    }
-  }, [location.pathname]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -52,39 +44,34 @@ export default function LoginComponent() {
     e.preventDefault();
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length === 0) {
+      setIsLoading(true); // Set loading state to true
+      setApiError('');
       try {
         let response;
         if (isLogin) {
+          console.log('Form Data:', formData);
+          console.log('Is Login:', isLogin);
           response = await axios.post('http://localhost:5000/api/users/login', {
             correo: formData.correo,
             password: formData.password
           });
-
-          if (response.data.token) {
-            login(response.data.token, response.data.user);
-            navigate('/');
-          } else {
-            setApiError('Error en la respuesta del servidor');
-          }
+          console.log('Server Response:', response.data);
         } else {
-          const registerData = {
-            nombre: formData.nombre,
-            apellido: formData.apellido,
-            rut: formData.rut,
-            correo: formData.correo,
-            password: formData.password,
-            es_udp: formData.es_udp ? 'si' : 'no',
-            carrera: formData.carrera
-          };
-          console.log('Datos a enviar:', registerData);
-          response = await axios.post('http://localhost:5000/api/users/register', registerData);
-
-          if (response.status === 201) {
-            navigate('/iniciar-sesion');
-            window.location.reload();
-          } else {
-            setApiError('Error en la respuesta del servidor');
+          console.log('Form Data:', formData);
+          console.log('Is Login:', isLogin);
+          response = await axios.post('http://localhost:5000/api/users/register', formData);
+          console.log('Server Response:', response.data);
+        }
+        
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+          // Asegúrate de que también estás guardando los datos del usuario si es necesario
+          if (response.data.user) {
+            localStorage.setItem('user', JSON.stringify(response.data.user));
           }
+          navigate('/');
+        } else {
+          setApiError('Error en la respuesta del servidor: No se recibió el token');
         }
       } catch (error) {
         console.error('Error details:', error);
@@ -95,6 +82,9 @@ export default function LoginComponent() {
         } else {
           setApiError('Error al procesar la solicitud');
         }
+        console.error('Error:', error); // Added error logging
+      } finally {
+        setIsLoading(false); // Set loading state to false
       }
     } else {
       setErrors(validationErrors);
@@ -204,8 +194,14 @@ export default function LoginComponent() {
             </>
           )}
           <div className="flex items-baseline justify-between mt-4">
-            <button className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900">
-              {isLogin ? 'Iniciar Sesión' : 'Registrarse'}
+            <button 
+              className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900 disabled:bg-blue-300"
+              disabled={isLoading} // Added disabled prop
+            >
+              {isLoading 
+                ? 'Cargando...' 
+                : (isLogin ? 'Iniciar Sesión' : 'Registrarse')
+              }
             </button>
             <button
               type="button"
@@ -223,4 +219,6 @@ export default function LoginComponent() {
       </div>
     </div>
   );
-}
+};
+
+export default LoginComponent;

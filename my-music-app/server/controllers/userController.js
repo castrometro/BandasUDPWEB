@@ -65,11 +65,10 @@ exports.registerUser = async (req, res) => {
 };
 
 exports.loginUser = async (req, res) => {
-  console.log('Datos recibidos para login:', req.body);
   try {
     const { correo, password } = req.body;
 
-    // Validar campos requeridos
+    // Validar los campos requeridos
     if (!correo || !password) {
       return res.status(400).json({ message: 'Correo y contraseña son requeridos' });
     }
@@ -92,7 +91,7 @@ exports.loginUser = async (req, res) => {
     }
 
     // Generar un token de autenticación
-    const token = jwt.sign({ userId: user.id, correo: user.correo }, 'secret_key', { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id_usuario, correo: user.correo }, 'secret_key', { expiresIn: '1h' });
 
     res.status(200).json({
       message: 'Inicio de sesión exitoso',
@@ -104,3 +103,76 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+
+exports.getUserProfile = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    // Consulta para obtener la información del usuario incluyendo el nombre de la banda
+    const userQuery = `
+      SELECT u.nombre, u.apellido, u.carrera, u.correo, b.nombre_banda AS nombre_banda
+      FROM usuarios u
+      LEFT JOIN bandas b ON u.id_banda = b.id_banda
+      WHERE u.id_usuario = ?
+    `;
+
+    // Consulta para obtener las reservas del usuario
+    const reservationQuery = `
+      SELECT 
+        r.fecha, r.hora_inicio, r.hora_fin, s.nombre AS nombre_sala
+      FROM 
+        reservas r
+      LEFT JOIN salas s ON r.sala_id = s.id
+      WHERE 
+        r.banda_id = ?
+      ORDER BY 
+        r.fecha DESC
+    `;
+
+    // Ejecutar la consulta para el perfil del usuario
+    const [userResult] = await db.query(userQuery, [userId]);
+
+    if (userResult.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    const user = userResult[0];
+
+    // Ejecutar la consulta para las reservas
+    const [reservationResult] = await db.query(reservationQuery, [user.id_banda]);
+
+    // Construir el objeto de perfil del usuario con el nombre de la banda y las reservas
+    const userProfile = {
+      nombre: user.nombre,
+      apellido: user.apellido,
+      carrera: user.carrera,
+      correo: user.correo,
+      banda: user.nombre_banda, // Mostrar el nombre de la banda directamente
+      reservas: reservationResult
+    };
+
+    res.status(200).json(userProfile);
+  } catch (error) {
+    console.error('Error al obtener perfil del usuario', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
+
+exports.getMe = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const query = `SELECT id_usuario, nombre, apellido, rut, correo, id_banda, es_udp, carrera FROM usuarios WHERE id_usuario = ?`;
+    const [rows] = await db.query(query, [userId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (error) {
+    console.error('Error al obtener los datos del usuario:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+

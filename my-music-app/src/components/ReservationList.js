@@ -1,18 +1,24 @@
+// ReservationList.js
 import React from 'react';
 
 const ReservationList = ({ reservas }) => {
+  if (reservas.length === 0) {
+    return <p>No hay próximas reservas.</p>;
+  }
+
   return (
-    <div className="space-y-3">
-      {reservas.map((reserva, index) => (
-        <div key={index} className="bg-gray-50 p-3 rounded-lg">
-          <h3 className="font-medium text-gray-900">{reserva.banda}</h3>
-          <p className="text-sm text-gray-600">
-            {reserva.fecha} - {reserva.hora} ({reserva.duracion})
-          </p>
-          <p className="text-sm text-gray-600">{reserva.sala}</p>
-        </div>
+    <ul>
+      {reservas.map((reserva) => (
+        <li key={reserva.id} className="mb-4">
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <p><strong>Fecha:</strong> {reserva.fecha}</p>
+            <p><strong>Hora de Inicio:</strong> {reserva.hora_inicio}</p>
+            <p><strong>Hora de Fin:</strong> {reserva.hora_fin}</p>
+            <p><strong>Sala:</strong> {reserva.sala_id}</p>
+          </div>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 };
 
