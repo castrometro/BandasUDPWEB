@@ -44,37 +44,34 @@ const LoginComponent = () => {
     e.preventDefault();
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length === 0) {
-      setIsLoading(true); // Set loading state to true
+      setIsLoading(true);
       setApiError('');
       try {
+        const dataToSend = {
+          ...formData,
+          es_udp: formData.es_udp ? "si" : "no" // Convertir a "si" o "no"
+        };
+  
         let response;
         if (isLogin) {
-          console.log('Form Data:', formData);
-          console.log('Is Login:', isLogin);
           response = await axios.post('http://localhost:5000/api/users/login', {
             correo: formData.correo,
             password: formData.password
           });
-          console.log('Server Response:', response.data);
         } else {
-          console.log('Form Data:', formData);
-          console.log('Is Login:', isLogin);
-          response = await axios.post('http://localhost:5000/api/users/register', formData);
-          console.log('Server Response:', response.data);
+          response = await axios.post('http://localhost:5000/api/users/register', dataToSend);
         }
-        
+  
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
-          // Asegúrate de que también estás guardando los datos del usuario si es necesario
           if (response.data.user) {
             localStorage.setItem('user', JSON.stringify(response.data.user));
           }
-          navigate('/');
+          navigate('/perfil-usuario'); // Redirige al perfil de usuario
         } else {
           setApiError('Error en la respuesta del servidor: No se recibió el token');
         }
       } catch (error) {
-        console.error('Error details:', error);
         if (error.response) {
           setApiError(error.response.data.message || 'Error en el servidor');
         } else if (error.request) {
@@ -82,14 +79,14 @@ const LoginComponent = () => {
         } else {
           setApiError('Error al procesar la solicitud');
         }
-        console.error('Error:', error); // Added error logging
       } finally {
-        setIsLoading(false); // Set loading state to false
+        setIsLoading(false);
       }
     } else {
       setErrors(validationErrors);
     }
   };
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

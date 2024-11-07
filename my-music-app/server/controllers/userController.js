@@ -176,3 +176,34 @@ exports.getMe = async (req, res) => {
   }
 };
 
+exports.addInstrument = async (req, res) => {
+  const { nombre } = req.body;
+  const userId = req.user.id; // Asegúrate de que `authMiddleware` pone el `id` del usuario en `req.user`
+
+  if (!nombre) {
+    return res.status(400).json({ message: 'El nombre del instrumento es requerido' });
+  }
+
+  try {
+    const query = `INSERT INTO instrumentos (id_usuario, nombre) VALUES (?, ?)`;
+    await db.query(query, [userId, nombre]);
+
+    res.status(201).json({ message: 'Instrumento añadido exitosamente' });
+  } catch (error) {
+    console.error('Error al añadir instrumento:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
+// userController.js
+exports.getInstruments = async (req, res) => {
+  const userId = req.params.userId; // Obtiene el ID del usuario de los parámetros de la URL
+  try {
+    const query = `SELECT * FROM instrumentos WHERE id_usuario = ?`;
+    const [rows] = await db.query(query, [userId]);
+    res.status(200).json(rows); // Devuelve los instrumentos como respuesta
+  } catch (error) {
+    console.error('Error al obtener instrumentos:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
