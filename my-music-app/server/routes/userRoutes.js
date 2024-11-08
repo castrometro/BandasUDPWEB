@@ -9,7 +9,10 @@ router.post('/register', userController.registerUser);
 router.get('/profile/:id', userController.getUserProfile);
 router.get('/me', authMiddleware, userController.getMe);
 router.get('/instruments/:userId', userController.getInstruments); 
-router.post('/add-instrument', authMiddleware, userController.addInstrument); 
+router.post('/add-instrument', authMiddleware, userController.addInstrument);
+router.get('/:userId/bandas', authMiddleware, userController.getUserBands);
+router.get('/:id/bandas', authMiddleware, userController.obtenerBandasDeUsuario);
+
 
 // Agrega la ruta de prueba aquí
 router.get('/test', (req, res) => {

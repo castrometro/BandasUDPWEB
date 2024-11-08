@@ -1,4 +1,3 @@
-// PerfilUsuario.js
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -6,6 +5,8 @@ import UserProfile from '../components/UserProfile';
 import BandCarousel from '../components/BandCarousel';
 import ReservationList from '../components/ReservationList';
 import InstrumentList from '../components/InstrumentList';
+import CrearBanda from '../components/CrearBanda';
+import UnirseBanda from '../components/UnirseBanda';
 import logo from '../images/logo.png';
 import axios from 'axios';
 
@@ -71,6 +72,14 @@ const PerfilUsuario = () => {
     fetchInstruments();
   }, [usuario]);
 
+  const handleBandaCreada = (nuevaBanda) => {
+    setBandas([...bandas, nuevaBanda]);
+  };
+
+  const handleBandaUnida = (nuevaBanda) => {
+    setBandas([...bandas, nuevaBanda]);
+  };
+
   const headerNavItems = [
     { title: "Inicio", url: "/" },
     { title: "Salas de ensayo", url: "/salas-de-ensayo" },
@@ -99,6 +108,8 @@ const PerfilUsuario = () => {
             <div className="px-6 py-4 bg-gray-50">
               <h2 className="text-lg font-semibold text-gray-900 mb-3">Mis Bandas</h2>
               <BandCarousel bandas={bandas} />
+              <CrearBanda onBandaCreada={handleBandaCreada} />
+              <UnirseBanda onBandaUnida={handleBandaUnida} />
             </div>
             <div className="px-6 py-4">
               <h2 className="text-lg font-semibold text-gray-900 mb-3">Próximas Reservas</h2>

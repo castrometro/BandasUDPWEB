@@ -18,7 +18,7 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Formato de correo inválido' });
     }
 
-    // Validar formato de RUT (puedes implementar una validación más robusta si lo deseas)
+    // Validar formato de RUT
     const rutRegex = /^\d{7,8}-[\dkK]$/;
     if (!rutRegex.test(rut)) {
       return res.status(400).json({ message: 'Formato de RUT inválido' });
@@ -66,6 +66,7 @@ exports.registerUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   try {
+    console.log('Datos recibidos en el backend:', req.body);
     const { correo, password } = req.body;
 
     // Validar los campos requeridos
@@ -110,9 +111,10 @@ exports.getUserProfile = async (req, res) => {
   try {
     // Consulta para obtener la información del usuario incluyendo el nombre de la banda
     const userQuery = `
-      SELECT u.nombre, u.apellido, u.carrera, u.correo, b.nombre_banda AS nombre_banda
+      SELECT u.nombre, u.apellido, u.carrera, u.correo, b.nombre_banda
       FROM usuarios u
-      LEFT JOIN bandas b ON u.id_banda = b.id_banda
+      LEFT JOIN integrante i ON u.id_usuario = i.id_usuario
+      LEFT JOIN bandas b ON i.id_banda = b.id_banda
       WHERE u.id_usuario = ?
     `;
 
@@ -122,9 +124,10 @@ exports.getUserProfile = async (req, res) => {
         r.fecha, r.hora_inicio, r.hora_fin, s.nombre AS nombre_sala
       FROM 
         reservas r
+      JOIN integrante i ON r.banda_id = i.id_banda
       LEFT JOIN salas s ON r.sala_id = s.id
       WHERE 
-        r.banda_id = ?
+        i.id_usuario = ?
       ORDER BY 
         r.fecha DESC
     `;
@@ -139,7 +142,7 @@ exports.getUserProfile = async (req, res) => {
     const user = userResult[0];
 
     // Ejecutar la consulta para las reservas
-    const [reservationResult] = await db.query(reservationQuery, [user.id_banda]);
+    const [reservationResult] = await db.query(reservationQuery, [userId]);
 
     // Construir el objeto de perfil del usuario con el nombre de la banda y las reservas
     const userProfile = {
@@ -147,7 +150,7 @@ exports.getUserProfile = async (req, res) => {
       apellido: user.apellido,
       carrera: user.carrera,
       correo: user.correo,
-      banda: user.nombre_banda, // Mostrar el nombre de la banda directamente
+      banda: user.nombre_banda,
       reservas: reservationResult
     };
 
@@ -162,14 +165,35 @@ exports.getUserProfile = async (req, res) => {
 exports.getMe = async (req, res) => {
   try {
     const userId = req.user.id;
-    const query = `SELECT id_usuario, nombre, apellido, rut, correo, id_banda, es_udp, carrera FROM usuarios WHERE id_usuario = ?`;
+    const query = `
+      SELECT u.id_usuario, u.nombre, u.apellido, u.rut, u.correo, u.es_udp, u.carrera,
+             b.id_banda, b.nombre_banda
+      FROM usuarios u
+      LEFT JOIN integrante i ON u.id_usuario = i.id_usuario
+      LEFT JOIN bandas b ON i.id_banda = b.id_banda
+      WHERE u.id_usuario = ?
+    `;
     const [rows] = await db.query(query, [userId]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    res.status(200).json(rows[0]);
+    const userData = {
+      id_usuario: rows[0].id_usuario,
+      nombre: rows[0].nombre,
+      apellido: rows[0].apellido,
+      rut: rows[0].rut,
+      correo: rows[0].correo,
+      es_udp: rows[0].es_udp,
+      carrera: rows[0].carrera,
+      banda: rows[0].id_banda ? {
+        id_banda: rows[0].id_banda,
+        nombre_banda: rows[0].nombre_banda
+      } : null
+    };
+
+    res.status(200).json(userData);
   } catch (error) {
     console.error('Error al obtener los datos del usuario:', error);
     res.status(500).json({ message: 'Error interno del servidor' });
@@ -178,7 +202,7 @@ exports.getMe = async (req, res) => {
 
 exports.addInstrument = async (req, res) => {
   const { nombre } = req.body;
-  const userId = req.user.id; // Asegúrate de que `authMiddleware` pone el `id` del usuario en `req.user`
+  const userId = req.user.id;
 
   if (!nombre) {
     return res.status(400).json({ message: 'El nombre del instrumento es requerido' });
@@ -195,15 +219,55 @@ exports.addInstrument = async (req, res) => {
   }
 };
 
-// userController.js
+
 exports.getInstruments = async (req, res) => {
-  const userId = req.params.userId; // Obtiene el ID del usuario de los parámetros de la URL
+  const userId = req.params.userId;
   try {
     const query = `SELECT * FROM instrumentos WHERE id_usuario = ?`;
     const [rows] = await db.query(query, [userId]);
-    res.status(200).json(rows); // Devuelve los instrumentos como respuesta
+    res.status(200).json(rows);
   } catch (error) {
     console.error('Error al obtener instrumentos:', error);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+
+exports.getUserBands = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const query = `
+      SELECT b.id_banda, b.nombre_banda, b.descripcion_banda, b.prox_eventos
+      FROM bandas b
+      INNER JOIN integrante i ON b.id_banda = i.id_banda
+      WHERE i.id_usuario = ?
+    `;
+    const [rows] = await db.query(query, [userId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron bandas para este usuario' });
+    }
+
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error('Error al obtener las bandas del usuario:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+exports.obtenerBandasDeUsuario = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const [bandas] = await db.query(`
+      SELECT b.*, i.es_lider 
+      FROM bandas b
+      INNER JOIN integrante i ON b.id_banda = i.id_banda
+      WHERE i.id_usuario = ?
+    `, [userId]);
+
+    res.json(bandas);
+  } catch (error) {
+    console.error('Error al obtener las bandas del usuario:', error);
+    res.status(500).json({ mensaje: 'Error interno del servidor al obtener las bandas del usuario' });
+  }
+};
+
