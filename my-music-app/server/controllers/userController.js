@@ -269,5 +269,30 @@ exports.obtenerBandasDeUsuario = async (req, res) => {
     console.error('Error al obtener las bandas del usuario:', error);
     res.status(500).json({ mensaje: 'Error interno del servidor al obtener las bandas del usuario' });
   }
+  
+  exports.deleteInstrument = async (req, res) => {
+    const { id } = req.params; // ID del instrumento a eliminar
+    const userId = req.user.id; // ID del usuario autenticado
+
+    try {
+      // Verificar que el instrumento pertenece al usuario
+      const query = `SELECT * FROM instrumentos WHERE id_instrumento = ? AND id_usuario = ?`;
+      const [rows] = await db.query(query, [id, userId]);
+
+      if (rows.length === 0) {
+        return res.status(404).json({ message: 'Instrumento no encontrado o no autorizado para eliminar.' });
+      }
+
+      // Eliminar el instrumento
+      const deleteQuery = `DELETE FROM instrumentos WHERE id_instrumento = ? AND id_usuario = ?`;
+      await db.query(deleteQuery, [id, userId]);
+
+      res.status(200).json({ message: 'Instrumento eliminado con éxito' });
+    } catch (error) {
+      console.error('Error al eliminar instrumento:', error);
+      res.status(500).json({ message: 'Error al eliminar el instrumento.' });
+    }
+  };
+
 };
 
