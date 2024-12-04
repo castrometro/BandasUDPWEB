@@ -16,11 +16,11 @@ export default function IniciarSesion() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header navItems={headerNavItems} logo={logo} />
-      <main className="flex-grow flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md bg-white shadow-lg rounded-lg overflow-hidden">
+   
+  
           <LoginComponent />
-        </div>
-      </main>
+
+ 
       <Footer />
     </div>
   )

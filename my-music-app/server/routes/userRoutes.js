@@ -12,6 +12,7 @@ router.get('/instruments/:userId', userController.getInstruments);
 router.post('/add-instrument', authMiddleware, userController.addInstrument);
 router.get('/:userId/bandas', authMiddleware, userController.getUserBands);
 router.get('/:id/bandas', authMiddleware, userController.obtenerBandasDeUsuario);
+router.delete('/instruments/:id', authMiddleware, userController.deleteInstrument);
 
 
 // Agrega la ruta de prueba aquí

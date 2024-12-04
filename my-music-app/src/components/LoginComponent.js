@@ -2,6 +2,55 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const carreras = [
+  "Administración Pública",
+  "Antropología",
+  "Arquitectura",
+  "Artes Visuales",
+  "Bachillerato en Administración y Economía",
+  "Bachillerato en Ciencias Sociales y Humanidades",
+  "Ciencia Política",
+  "Cine y Realización Audiovisual",
+  "Contador Auditor",
+  "Contador Auditor – Contador Público",
+  "Derecho",
+  "Diseño",
+  "Enfermería",
+  "Ingeniería Civil en Informática y Telecomunicaciones",
+  "Ingeniería Civil en Obras Civiles",
+  "Ingeniería Civil Industrial",
+  "Ingeniería Civil Plan Común",
+  "Ingeniería Comercial Mención Administración",
+  "Ingeniería Comercial Mención Economía",
+  "Ingeniería Comercial Mención Emprendimiento",
+  "Ingeniería en Administración de Empresas Mención Gestión de Marketing",
+  "Ingeniería en Administración de Empresas Mención Gestión Empresarial",
+  "Ingeniería en Administración de Empresas Mención Gestión Finanzas",
+  "Ingeniería en Control de Gestión",
+  "Ingeniería en Industria y Logística",
+  "Ingeniería en Informática y Gestión",
+  "Kinesiología",
+  "Licenciatura en Historia",
+  "Literatura Creativa",
+  "Medicina",
+  "Obstetricia y Neonatología",
+  "Odontología",
+  "Pedagogía en Educación Diferencial con mención en Desarrollo Cognitivo",
+  "Pedagogía en Educación General Básica",
+  "Pedagogía en Educación Parvularia",
+  "Pedagogía en Historia y Ciencias Sociales",
+  "Pedagogía en Inglés",
+  "Pedagogía en Lengua Castellana y Comunicación",
+  "Pedagogía Media en Matemática",
+  "Periodismo",
+  "Psicología",
+  "Publicidad",
+  "Sociología",
+  "Tecnología Médica Mención Bioanálisis Clínico y Medicina Transfusional",
+  "Tecnología Médica Mención Imagenología y Física Médica",
+  "Tecnología Médica Mención Oftalmología y Optometría"
+];
+
 const LoginComponent = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
@@ -15,12 +64,12 @@ const LoginComponent = () => {
   });
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Added loading state
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
       [name]: type === 'checkbox' ? checked : value,
     }));
@@ -49,36 +98,24 @@ const LoginComponent = () => {
       try {
         const dataToSend = {
           ...formData,
-          es_udp: formData.es_udp ? "si" : "no" // Convertir a "si" o "no"
+          es_udp: formData.es_udp ? "si" : "no",
         };
-  
-        let response;
-        if (isLogin) {
-          response = await axios.post('http://localhost:5000/api/users/login', {
-            correo: formData.correo,
-            password: formData.password
-          });
-        } else {
-          response = await axios.post('http://localhost:5000/api/users/register', dataToSend);
-        }
-  
+        const response = isLogin
+          ? await axios.post('http://localhost:5000/api/users/login', {
+              correo: formData.correo,
+              password: formData.password,
+            })
+          : await axios.post('http://localhost:5000/api/users/register', dataToSend);
+
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
-          if (response.data.user) {
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-          }
-          navigate('/perfil-usuario'); // Redirige al perfil de usuario
+          localStorage.setItem('user', JSON.stringify(response.data.user || {}));
+          navigate('/perfil-usuario');
         } else {
           setApiError('Error en la respuesta del servidor: No se recibió el token');
         }
       } catch (error) {
-        if (error.response) {
-          setApiError(error.response.data.message || 'Error en el servidor');
-        } else if (error.request) {
-          setApiError('No se pudo conectar con el servidor');
-        } else {
-          setApiError('Error al procesar la solicitud');
-        }
+        setApiError(error.response?.data?.message || 'Error al procesar la solicitud');
       } finally {
         setIsLoading(false);
       }
@@ -86,7 +123,6 @@ const LoginComponent = () => {
       setErrors(validationErrors);
     }
   };
-  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -94,6 +130,7 @@ const LoginComponent = () => {
         <h3 className="text-2xl font-bold text-center">{isLogin ? 'Iniciar Sesión' : 'Registrarse'}</h3>
         {apiError && <div className="mt-4 text-red-500 text-center">{apiError}</div>}
         <form onSubmit={handleSubmit} className="mt-4">
+          {/* Campos comunes */}
           <div className="mt-4">
             <label className="block" htmlFor="correo">Email</label>
             <input
@@ -175,30 +212,32 @@ const LoginComponent = () => {
               </div>
               {formData.es_udp && (
                 <div className="mt-4">
-                  <label className="block" htmlFor="carrera">Carrera</label>
-                  <input
-                    type="text"
-                    placeholder="Tu carrera"
+                  <label htmlFor="carrera" className="block">Selecciona tu carrera</label>
+                  <select
                     id="carrera"
                     name="carrera"
                     value={formData.carrera}
                     onChange={handleChange}
                     className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
-                  />
+                  >
+                    <option value="">Selecciona una carrera</option>
+                    {carreras.map((carrera, index) => (
+                      <option key={index} value={carrera}>
+                        {carrera}
+                      </option>
+                    ))}
+                  </select>
                   {errors.carrera && <span className="text-xs text-red-400">{errors.carrera}</span>}
                 </div>
               )}
             </>
           )}
           <div className="flex items-baseline justify-between mt-4">
-            <button 
+            <button
               className="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900 disabled:bg-blue-300"
-              disabled={isLoading} // Added disabled prop
+              disabled={isLoading}
             >
-              {isLoading 
-                ? 'Cargando...' 
-                : (isLogin ? 'Iniciar Sesión' : 'Registrarse')
-              }
+              {isLoading ? 'Cargando...' : isLogin ? 'Iniciar Sesión' : 'Registrarse'}
             </button>
             <button
               type="button"

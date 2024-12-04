@@ -210,14 +210,23 @@ exports.addInstrument = async (req, res) => {
 
   try {
     const query = `INSERT INTO instrumentos (id_usuario, nombre) VALUES (?, ?)`;
-    await db.query(query, [userId, nombre]);
+    const result = await db.query(query, [userId, nombre]);
 
-    res.status(201).json({ message: 'Instrumento añadido exitosamente' });
+    // Devolver el instrumento recién añadido
+    res.status(201).json({
+      message: 'Instrumento añadido exitosamente',
+      instrumento: {
+        id_instrumento: result.insertId,
+        nombre,
+      },
+    });
   } catch (error) {
     console.error('Error al añadir instrumento:', error);
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+
+
 
 
 exports.getInstruments = async (req, res) => {
@@ -265,34 +274,32 @@ exports.obtenerBandasDeUsuario = async (req, res) => {
     `, [userId]);
 
     res.json(bandas);
-  } catch (error) {
-    console.error('Error al obtener las bandas del usuario:', error);
-    res.status(500).json({ mensaje: 'Error interno del servidor al obtener las bandas del usuario' });
-  }
-  
+      } catch (error) {
+        console.error('Error al obtener las bandas del usuario:', error);
+       res.status(500).json({ mensaje: 'Error interno del servidor al obtener las bandas del usuario' });
+      }
+  };
   exports.deleteInstrument = async (req, res) => {
     const { id } = req.params; // ID del instrumento a eliminar
     const userId = req.user.id; // ID del usuario autenticado
-
+  
     try {
-      // Verificar que el instrumento pertenece al usuario
+      // Verificar que el instrumento pertenece al usuario autenticado
       const query = `SELECT * FROM instrumentos WHERE id_instrumento = ? AND id_usuario = ?`;
       const [rows] = await db.query(query, [id, userId]);
-
+  
       if (rows.length === 0) {
         return res.status(404).json({ message: 'Instrumento no encontrado o no autorizado para eliminar.' });
       }
-
+  
       // Eliminar el instrumento
       const deleteQuery = `DELETE FROM instrumentos WHERE id_instrumento = ? AND id_usuario = ?`;
       await db.query(deleteQuery, [id, userId]);
-
+  
       res.status(200).json({ message: 'Instrumento eliminado con éxito' });
     } catch (error) {
       console.error('Error al eliminar instrumento:', error);
       res.status(500).json({ message: 'Error al eliminar el instrumento.' });
     }
   };
-
-};
 
