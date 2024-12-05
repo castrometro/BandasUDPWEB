@@ -39,10 +39,9 @@ const PerfilUsuario = () => {
 
             setBandas([bandaResponse.data]);
 
-            const reservasResponse = await axios.get(
-              `http://localhost:5000/api/reservas/proximas/${userData.id_banda}`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
+            const reservasResponse = await axios.get('http://localhost:5000/api/users/mis-reservas', {
+              headers: { Authorization: `Bearer ${token}` },
+            });
 
             setReservas(reservasResponse.data);
           }
@@ -151,6 +150,19 @@ const PerfilUsuario = () => {
             </div>
             <div className="px-6 py-4">
               <h2 className="text-lg font-semibold text-gray-900 mb-3">Próximas Reservas</h2>
+              <button
+                onClick={() => navigate('/calendario-salas')}
+                className="px-4 py-2 rounded-md"
+                style={{
+                  backgroundColor: '#dd3333', // Fondo rojo
+                  color: '#ffffff', // Texto blanco
+                  transition: 'background-color 0.3s ease',
+                }}
+                onMouseOver={(e) => (e.target.style.backgroundColor = '#000000')} // Negro al pasar el mouse
+                onMouseOut={(e) => (e.target.style.backgroundColor = '#dd3333')} // Rojo al quitar el mouse
+              >
+                Reservar Hora
+              </button>
               <ReservationList reservas={reservas} />
             </div>
           </div>

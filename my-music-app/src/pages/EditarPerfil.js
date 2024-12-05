@@ -14,6 +14,55 @@ const instrumentosDisponibles = [
     'Otros'
   ];
 
+  const carreras = [
+    "Administración Pública",
+    "Antropología",
+    "Arquitectura",
+    "Artes Visuales",
+    "Bachillerato en Administración y Economía",
+    "Bachillerato en Ciencias Sociales y Humanidades",
+    "Ciencia Política",
+    "Cine y Realización Audiovisual",
+    "Contador Auditor",
+    "Contador Auditor – Contador Público",
+    "Derecho",
+    "Diseño",
+    "Enfermería",
+    "Ingeniería Civil en Informática y Telecomunicaciones",
+    "Ingeniería Civil en Obras Civiles",
+    "Ingeniería Civil Industrial",
+    "Ingeniería Civil Plan Común",
+    "Ingeniería Comercial Mención Administración",
+    "Ingeniería Comercial Mención Economía",
+    "Ingeniería Comercial Mención Emprendimiento",
+    "Ingeniería en Administración de Empresas Mención Gestión de Marketing",
+    "Ingeniería en Administración de Empresas Mención Gestión Empresarial",
+    "Ingeniería en Administración de Empresas Mención Gestión Finanzas",
+    "Ingeniería en Control de Gestión",
+    "Ingeniería en Industria y Logística",
+    "Ingeniería en Informática y Gestión",
+    "Kinesiología",
+    "Licenciatura en Historia",
+    "Literatura Creativa",
+    "Medicina",
+    "Obstetricia y Neonatología",
+    "Odontología",
+    "Pedagogía en Educación Diferencial con mención en Desarrollo Cognitivo",
+    "Pedagogía en Educación General Básica",
+    "Pedagogía en Educación Parvularia",
+    "Pedagogía en Historia y Ciencias Sociales",
+    "Pedagogía en Inglés",
+    "Pedagogía en Lengua Castellana y Comunicación",
+    "Pedagogía Media en Matemática",
+    "Periodismo",
+    "Psicología",
+    "Publicidad",
+    "Sociología",
+    "Tecnología Médica Mención Bioanálisis Clínico y Medicina Transfusional",
+    "Tecnología Médica Mención Imagenología y Física Médica",
+    "Tecnología Médica Mención Oftalmología y Optometría"
+  ];
+
 const EditarPerfil = () => {
   const [formData, setFormData] = useState({
     nombre: '',
@@ -104,7 +153,6 @@ const EditarPerfil = () => {
   
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
     try {
       const token = localStorage.getItem('token');
       await axios.put('http://localhost:5000/api/users/update', formData, {
@@ -119,7 +167,7 @@ const EditarPerfil = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <div className="container mx-auto px-4 py-8">
-        <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-lg p-6" style={{ backgroundColor: '#f5f5f5', color: '#000000' }}>
+        <form className="bg-white shadow-lg rounded-lg p-6" style={{ backgroundColor: '#f5f5f5', color: '#000000' }}>
           <h2 className="text-2xl font-bold mb-4" style={{ color: '#dd3333' }}>Editar Perfil</h2>
           <div className="mb-4">
             <label className="block text-sm font-medium">Nombre</label>
@@ -141,19 +189,30 @@ const EditarPerfil = () => {
               className="w-full px-4 py-2 border rounded-md"
             />
           </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium">Carrera</label>
-            <input
-              type="text"
-              name="carrera"
-              value={formData.carrera}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md"
-            />
-          </div>
+          <div className="mt-4">
+            <label htmlFor="carrera" className="block">Selecciona tu carrera</label>
+              <select
+                id="carrera"
+                name="carrera"
+                value={formData.carrera}
+                onChange={handleChange}
+                className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+              >
+                <option value="">Selecciona una carrera</option>
+                {carreras.map((carrera, index) => (
+                  <option key={index} value={carrera}>
+                    {carrera}
+                  </option>
+                ))}
+              </select>
+        </div>
+
           <div className="text-right">
             <button
-              type="submit"
+              type="button"
+              onClick={() =>
+                handleSubmit()
+              }
               className="px-4 py-2 rounded-md"
               style={{
                 backgroundColor: '#dd3333',

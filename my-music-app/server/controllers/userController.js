@@ -303,3 +303,90 @@ exports.obtenerBandasDeUsuario = async (req, res) => {
     }
   };
 
+
+
+
+exports.updateUserProfile = async (req, res) => {
+  const userId = req.user.id;
+  const {nombre, apellido, carrera} = req.body;
+  console.log(nombre,apellido);
+
+  if (!nombre || !apellido || !carrera){
+    return res.status(400).json({message: 'Todos los campos son obligatorios.'});
+  }
+
+  try {
+    const query = `
+      UPDATE usuarios 
+      SET nombre = ?, apellido = ?, carrera = ? 
+      WHERE id_usuario = ?
+    `;
+    console.log(nombre,apellido);
+    await db.query(query, [nombre, apellido, carrera, userId]);
+    res.status(200).json({message: 'Perfil actualizado con éxito'}); 
+  } catch (error){
+    console.log('Error al actualizar perfil:', error);
+    res.status(500).json({message: 'Error al actualizar perfil.'})
+  }
+};
+
+exports.getMisReservas = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    // Consulta para obtener las bandas a las que pertenece el usuario
+    const bandasQuery = `
+      SELECT id_banda
+      FROM integrante
+      WHERE id_usuario = ?
+    `;
+
+    const [bandas] = await db.query(bandasQuery, [userId]);
+
+    if (bandas.length === 0) {
+      return res.status(200).json([]); // No pertenece a ninguna banda
+    }
+
+    const bandaIds = bandas.map((banda) => banda.id_banda);
+
+    // Consulta para obtener las reservas de las bandas
+    const reservasQuery = `
+      SELECT r.id, r.sala_id, r.fecha, r.hora_inicio, r.hora_fin
+      FROM reservas r
+      WHERE r.banda_id IN (?)
+      ORDER BY r.fecha ASC, r.hora_inicio ASC
+    `;
+
+    const [reservas] = await db.query(reservasQuery, [bandaIds]);
+
+    res.status(200).json(reservas);
+  } catch (error) {
+    console.error('Error al obtener reservas:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+exports.getUserBands = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const query = `
+      SELECT b.id_banda, b.nombre_banda
+      FROM bandas b
+      INNER JOIN integrante i ON b.id_banda = i.id_banda
+      WHERE i.id_usuario = ?
+    `;
+    const [bands] = await db.query(query, [userId]);
+
+    if (bands.length === 0) {
+      return res.status(404).json({ message: 'No tienes bandas asociadas' });
+    }
+
+    res.status(200).json(bands);
+  } catch (error) {
+    console.error('Error al obtener las bandas del usuario:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
+
+
