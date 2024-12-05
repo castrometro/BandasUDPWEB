@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatISO, startOfDay } from 'date-fns'; // Importar funciones útiles
 import { format, startOfWeek, addDays, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Modal from './Modal';
@@ -28,16 +29,18 @@ const WeeklyCalendar = ({ events }) => {
   // Días: solo de lunes a viernes
   const days = Array.from({ length: 5 }, (_, i) => addDays(weekStart, i));
 
-  // Horas desde 8:30 hasta 18:00 en intervalos de 30 minutos
-  const hours = Array.from({ length: 20 }, (_, i) => {
-    const baseHour = Math.floor((8.5 * 2 + i) / 2);
-    const minutes = (i % 2) === 0 ? 30 : 0;
-    return { hour: baseHour, minutes };
+  // Horas desde 8:00 hasta 21:00 en intervalos de 1 hora
+  const hours = Array.from({ length: 14 }, (_, i) => {
+    const baseHour = 8 + i; // Comienza desde las 8 y suma i
+    return { hour: baseHour, minutes: 0 }; // Siempre comienza en 0 minutos
   });
+
+
 
   const getEventForDateAndTime = (date, hour, minutes) => {
     return events.find((event) => {
       const eventDate = parseISO(event.date);
+      console.log(eventDate)
       return (
         eventDate.getDate() === date.getDate() &&
         eventDate.getMonth() === date.getMonth() &&
@@ -69,20 +72,39 @@ const WeeklyCalendar = ({ events }) => {
     const token = localStorage.getItem('token');
   
     try {
+        // Convertir el día seleccionado a una fecha válida en formato 'YYYY-MM-DD'
+      const selectedDate = addDays(startOfDay(new Date()), days.findIndex(day => day === selectedSlot.day));
+      const formattedFecha = formatISO(selectedDate, { representation: 'date' });
+
+      // Asegurar que hora_inicio y hora_fin estén correctamente formateados
+      const [hour, minute] = selectedSlot.time.split(':').map(Number);
+      const horaInicio = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`;
+      const horaFin = `${(hour + 1).toString().padStart(2, '0')}:00:00`;
+
+   
+      // Log para depuración
+      console.log('Datos enviados a la API:', {
+        sala_id: sala === 'Toesca' ? 1 : 2,
+        fecha: formattedFecha,
+        hora_inicio: horaInicio,
+        hora_fin: horaFin,
+        banda_id: banda,
+      });
+
       const response = await axios.post(
         'http://localhost:5000/api/reservas/create',
         {
-          sala_id: sala === 'Toesca' ? 1 : 2, // IDs de las salas
-          fecha: selectedSlot.day,
-          hora_inicio: `${selectedSlot.time}:00`,
-          hora_fin: `${parseInt(selectedSlot.time.split(':')[0]) + 1}:00`,
+          sala_id: sala === 'Toesca' ? 1 : 2,
+          fecha: formattedFecha,
+          hora_inicio: horaInicio,
+          hora_fin: horaFin,
           banda_id: banda,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-  
+
       if (response.status === 201) {
         alert('Reserva creada exitosamente');
         setModalOpen(false);
@@ -91,6 +113,7 @@ const WeeklyCalendar = ({ events }) => {
       console.error('Error al crear la reserva:', error);
       alert('No se pudo crear la reserva. Intenta de nuevo.');
     }
+    
   };
   
 

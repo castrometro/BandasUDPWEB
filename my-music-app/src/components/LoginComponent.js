@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from './AuthContext'
 
 const carreras = [
   "Administración Pública",
@@ -66,6 +67,8 @@ const LoginComponent = () => {
   const [apiError, setApiError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { fetchUserData } = useAuth();
+
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -108,8 +111,10 @@ const LoginComponent = () => {
           : await axios.post('http://localhost:5000/api/users/register', dataToSend);
 
         if (response.data.token) {
+          
           localStorage.setItem('token', response.data.token);
           localStorage.setItem('user', JSON.stringify(response.data.user || {}));
+          await fetchUserData(response.data.token);
           navigate('/perfil-usuario');
         } else {
           setApiError('Error en la respuesta del servidor: No se recibió el token');

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server/server.js",
+    "start": "nodemon server.js",
     "build": "react-scripts build && cp -r build server/",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "client": "react-scripts start",
@@ -22,6 +22,7 @@
     "html5-qrcode": "^2.3.8",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.3",
+    "nodemon": "^3.1.7",
     "qrcode.react": "^4.1.0",
     "react-qr-code": "^2.0.15"
   }

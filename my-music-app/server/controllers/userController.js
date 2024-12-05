@@ -2,6 +2,18 @@ const db = require('../database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const { format } = require('date-fns');
+const { es } = require('date-fns/locale');
+
+const formatHora = (hora) => {
+  return hora.slice(0, 5); // Extrae solo "HH:MM"
+};
+
+const formatFecha = (fechaISO) => {
+  return format(new Date(fechaISO), "dd 'de' MMMM 'de' yyyy", { locale: es });
+};
+
+
 exports.registerUser = async (req, res) => {
   console.log('Datos recibidos en el backend:', req.body);
   try {
@@ -309,7 +321,6 @@ exports.obtenerBandasDeUsuario = async (req, res) => {
 exports.updateUserProfile = async (req, res) => {
   const userId = req.user.id;
   const {nombre, apellido, carrera} = req.body;
-  console.log(nombre,apellido);
 
   if (!nombre || !apellido || !carrera){
     return res.status(400).json({message: 'Todos los campos son obligatorios.'});
@@ -321,7 +332,7 @@ exports.updateUserProfile = async (req, res) => {
       SET nombre = ?, apellido = ?, carrera = ? 
       WHERE id_usuario = ?
     `;
-    console.log(nombre,apellido);
+    
     await db.query(query, [nombre, apellido, carrera, userId]);
     res.status(200).json({message: 'Perfil actualizado con éxito'}); 
   } catch (error){
@@ -342,7 +353,7 @@ exports.getMisReservas = async (req, res) => {
     `;
 
     const [bandas] = await db.query(bandasQuery, [userId]);
-
+    console.log(bandas);
     if (bandas.length === 0) {
       return res.status(200).json([]); // No pertenece a ninguna banda
     }
@@ -358,13 +369,23 @@ exports.getMisReservas = async (req, res) => {
     `;
 
     const [reservas] = await db.query(reservasQuery, [bandaIds]);
+    const reservasFormateadas = reservas.map((reserva) => ({
+      id: reserva.id,
+      sala_id: reserva.sala_id,
+      fecha: formatFecha(reserva.fecha),       // Fecha formateada
+      hora_inicio: formatHora(reserva.hora_inicio), // Hora de inicio formateada
+      hora_fin: formatHora(reserva.hora_fin),       // Hora de fin formateada
+    }));
+    console.log(reservasFormateadas);
 
-    res.status(200).json(reservas);
+    res.status(200).json(reservasFormateadas);
   } catch (error) {
     console.error('Error al obtener reservas:', error);
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };
+
+
 exports.getUserBands = async (req, res) => {
   const userId = req.user.id;
 

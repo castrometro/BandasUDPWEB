@@ -1,9 +1,8 @@
-// ReservationList.js
 import React from 'react';
 
 const ReservationList = ({ reservas }) => {
   if (reservas.length === 0) {
-    return <p>No hay próximas reservas.</p>;
+    return <p className="text-gray-500">No hay reservas próximas.</p>;
   }
 
   return (

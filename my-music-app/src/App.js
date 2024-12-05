@@ -14,6 +14,7 @@ import BandPage from './pages/BandPage';
 import Reservar from './pages/reservar';
 import GestionBandas from './pages/GestionBandas';
 import EditarPerfil  from './pages/EditarPerfil';
+import DetallesBandas  from './pages/DetallesBanda';
 
 function App() {
   return (
@@ -28,9 +29,10 @@ function App() {
             <Route path="/calendario-salas" element={<Calendario/>} />
             <Route path="/verificador-integrante" element={<Verificador/>} />
             <Route path="/perfil-usuario" element={<PerfilUsuario/>} />
-            <Route path="/band-page" element={<BandPage/>} />
+            <Route path="/band-page/:bandId" element={<BandPage/>} />
             <Route path="/reservar" element={<Reservar/>} />
             <Route path="/editar-perfil" element={<EditarPerfil/>} />
+            <Route path="/detalles-bandas" element={<DetallesBandas/>} />
           </Routes>
         </div>
       </Router>

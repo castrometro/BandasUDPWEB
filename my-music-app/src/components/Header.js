@@ -1,23 +1,58 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect,useMemo } from 'react'
+import { Link} from 'react-router-dom'
 import { useAuth } from './AuthContext'
+import { useNavigate } from 'react-router-dom';
 
-const Header = ({ navItems, logo }) => {
+const Header = ({ logo }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { user, logout } = useAuth()
-
+  const navigate = useNavigate();
+  
+  
   const handleLogout = () => {
     logout()
     setIsMenuOpen(false)
+    navigate("/iniciar-sesion")
   }
 
-  const authNavItems = user
-    ? [
-        ...navItems.filter(item => item.title !== "Login"),
-        { title: "Mi Perfil", url: "/perfil-usuario" },
-        { title: "Cerrar sesión", url: "#", onClick: handleLogout }
-      ]
-    : navItems
+
+  const NavItems_NOTLOGGED = [
+    { title: "Login", url: "/iniciar-sesion" },
+    { title: "Salas de ensayo", url: "/sala-de-ensayo" },
+    // { title: "Bandas UDP", url: "/bandas-udp" },
+    // { title: "Verificador Integrante", url: "/verificador-integrante" },
+    { title: "Calendario salas", url: "/calendario-salas" }
+  ]
+
+
+
+  const NavItems_LOGGED = [
+    { title: "Salas de ensayo", url: "/sala-de-ensayo" },
+    // { title: "Bandas UDP", url: "/bandas-udp" },
+    // { title: "Verificador Integrante", url: "/verificador-integrante" },
+    { title: "Calendario salas", url: "/calendario-salas" },
+    { title: "Mi Perfil", url: "/perfil-usuario" },
+    { title: "Cerrar sesión", url: "/iniciar-sesion", onClick: handleLogout }
+  ]
+  console.log(user, '<---')
+  const navItems = useMemo(() => {
+    console.log(user)
+    if(user){
+      return NavItems_LOGGED
+    }else{
+      return NavItems_NOTLOGGED
+    }
+  }, [user])
+
+
+ 
+  // const authNavItems = user
+  //   ? [
+  //       ...navItems.filter(item => item.title !== "Login"),
+  //       { title: "Mi Perfil", url: "/perfil-usuario" },
+  //       { title: "Cerrar sesión", url: "#", onClick: handleLogout }
+  //     ]
+  //   : navItems
 
   return (
     <header className="bg-white shadow-md">
@@ -40,7 +75,7 @@ const Header = ({ navItems, logo }) => {
           {/* Navigation for larger screens */}
           <nav className="hidden md:block">
             <ul className="flex space-x-4">
-              {authNavItems.map((item, index) => (
+              {navItems.map((item, index) => (
                 <li key={index}>
                   {item.onClick ? (
                     <button onClick={item.onClick} className="text-gray-700 hover:text-red-600">
@@ -61,7 +96,7 @@ const Header = ({ navItems, logo }) => {
         {isMenuOpen && (
           <nav className="mt-4 md:hidden">
             <ul className="flex flex-col space-y-2">
-              {authNavItems.map((item, index) => (
+              {navItems.map((item, index) => (
                 <li key={index}>
                   {item.onClick ? (
                     <button 

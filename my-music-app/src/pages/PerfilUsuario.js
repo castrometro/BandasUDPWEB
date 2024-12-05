@@ -30,23 +30,23 @@ const PerfilUsuario = () => {
 
           const userData = response.data;
           setUsuario(userData);
-
-          if (userData.id_banda) {
+          const { banda } = userData;
+          
+          if (userData.banda && banda.id_banda) {
             const bandaResponse = await axios.get(
-              `http://localhost:5000/api/bandas/${userData.id_banda}`,
+              `http://localhost:5000/api/bandas/${banda.id_banda}`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
 
             setBandas([bandaResponse.data]);
-
+            
             const reservasResponse = await axios.get('http://localhost:5000/api/users/mis-reservas', {
               headers: { Authorization: `Bearer ${token}` },
             });
-
+            console.log(reservasResponse);
             setReservas(reservasResponse.data);
           }
-
-          // Obtener instrumentos del usuario
+          
           const instrumentosResponse = await axios.get(
             `http://localhost:5000/api/users/instruments/${userData.id_usuario}`,
             { headers: { Authorization: `Bearer ${token}` } }
